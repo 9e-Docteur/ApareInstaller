@@ -26,12 +26,12 @@ public class Installer extends JFrame implements ActionListener {
     private String installerPath = "C:\\ApareProject\\Runtime\\ApareInstaller.jar";
 
     public Installer() {
-        super("Mon installateur de programme");
+        super("Apare Project Installer");
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        statusLabel = new JLabel("Cliquez sur Installer pour commencer l'installation.");
+        statusLabel = new JLabel("Click to install");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(statusLabel, BorderLayout.NORTH);
 
@@ -39,7 +39,7 @@ public class Installer extends JFrame implements ActionListener {
         progressBar.setStringPainted(true);
         panel.add(progressBar, BorderLayout.CENTER);
 
-        installButton = new JButton("Installer");
+        installButton = new JButton("Install");
         installButton.addActionListener(this);
         panel.add(installButton, BorderLayout.SOUTH);
 
@@ -61,7 +61,25 @@ public class Installer extends JFrame implements ActionListener {
                 public void run() {
                     downloadFile(jarUrl, installPath);
                     downloadFile(runTimeURL, runTimePath);
-                    downloadFile(installerURL, installPath);
+                    downloadFile(installerURL, installerPath);
+                    String desktopPath = System.getProperty("user.home") + "/Desktop/";
+                    String jarPath = "C:/ApareProject/Runtime/ApareRuntime.jar";
+
+                    try {
+                        File shortcut = new File(desktopPath + "ApareProject.lnk");
+
+                        FileOutputStream fos = new FileOutputStream(shortcut);
+
+                        fos.write(getShortcutData(jarPath));
+
+                        fos.close();
+
+                        Process p = Runtime.getRuntime().exec("attrib +H \"" + shortcut.getAbsolutePath() + "\"");
+                        p.waitFor();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }).start();
         }
@@ -112,8 +130,8 @@ public class Installer extends JFrame implements ActionListener {
 
             JSONObject jsonObj = new JSONObject(jsonStr);
 
-            String latestVersionStr = jsonObj.getString("version");
-            return Double.valueOf(latestVersionStr);
+            double latestVersionStr = jsonObj.getDouble("version");
+            return latestVersionStr;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,6 +167,33 @@ public class Installer extends JFrame implements ActionListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static byte[] getShortcutData(String target) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(stream);
+
+        out.writeShort(0x4C);
+        out.writeShort(0x00);
+
+        out.writeShort(0x1C + 2 * target.length());
+        out.writeShort(0x00);
+
+        out.writeInt(0x0000001F);
+
+        out.writeBytes(target);
+        out.writeByte(0x00);
+
+        out.writeBytes("");
+        out.writeByte(0x00);
+
+        out.writeBytes("");
+        out.writeByte(0x00);
+
+        out.writeBytes("");
+        out.writeByte(0x00);
+
+        return stream.toByteArray();
     }
 
     public static void main(String[] args) {
