@@ -101,7 +101,6 @@ public class Installer extends JFrame implements ActionListener {
 
     public double checkVersionToDownload() {
         try {
-            // Lecture du fichier JSON contenant la dernière version disponible
             URL url = new URL(VERSION_URL);
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             String jsonStr = "";
@@ -111,10 +110,8 @@ public class Installer extends JFrame implements ActionListener {
             }
             reader.close();
 
-            // Conversion de la chaîne JSON en un objet JSON
             JSONObject jsonObj = new JSONObject(jsonStr);
 
-            // Récupération de la dernière version disponible
             String latestVersionStr = jsonObj.getString("version");
             return Double.valueOf(latestVersionStr);
 
@@ -136,16 +133,12 @@ public class Installer extends JFrame implements ActionListener {
             }
             reader.close();
 
-            // Conversion de la chaîne JSON en un objet JSON
             JSONObject jsonObj = new JSONObject(jsonStr);
 
-            // Récupération de la dernière version disponible
             String latestVersionStr = jsonObj.getString("version");
             double version = Double.valueOf(latestVersionStr);
 
-            // Comparaison des versions
             if (version > currentVersion) {
-                // Téléchargement de la dernière version
                 String downloadUrl = jsonObj.getString("url");
                 downloadFile(downloadUrl, installPath);
                 System.out.println("Nouvelle version installée !");
